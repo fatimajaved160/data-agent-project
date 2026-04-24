@@ -1,0 +1,11 @@
+requests==2.31.0
+yfinance
+scikit-learn
+pandas
+numpy
+anthropic
+python-dotenv
+streamlit
+plotly
+fastapi
+uvicorn

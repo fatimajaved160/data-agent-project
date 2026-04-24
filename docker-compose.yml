@@ -1,0 +1,30 @@
+services:
+
+  # ── FastAPI service ──────────────────────────────────────────────────────────
+  api:
+    build: .                        # build the image using the Dockerfile in this folder
+    container_name: data-agent-api
+    ports:
+      - "8000:8000"                 # map container port 8000 → your machine's port 8000
+    env_file:
+      - .env                        # inject API key at runtime (never baked into the image)
+    volumes:
+      - ./data:/app/data            # share the data/ folder so DB persists between runs
+      - ./reports:/app/reports      # share reports/ so generated reports are saved locally
+    restart: unless-stopped         # automatically restart if it crashes
+
+  # ── Streamlit dashboard service ──────────────────────────────────────────────
+  dashboard:
+    build: .                        # reuse the same image
+    container_name: data-agent-dashboard
+    command: streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"                 # map container port 8501 → your machine's port 8501
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data            # same shared DB so dashboard reads live data
+      - ./reports:/app/reports
+    depends_on:
+      - api                         # start the API container first
+    restart: unless-stopped
