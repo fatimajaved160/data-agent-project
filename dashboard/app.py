@@ -115,10 +115,10 @@ st.subheader("Overview")
 
 col1, col2, col3, col4 = st.columns(4)
 
-total      = len(anomalies_df)
-financial  = len(anomalies_df[anomalies_df["source"] == "financial"])
-combined   = len(anomalies_df[anomalies_df["source"] == "combined"])
-weather    = len(anomalies_df[anomalies_df["source"] == "weather"])
+total     = len(anomalies_df)
+financial = len(anomalies_df[anomalies_df["source"] == "financial"]) if "source" in anomalies_df.columns else 0
+combined  = len(anomalies_df[anomalies_df["source"] == "combined"])  if "source" in anomalies_df.columns else 0
+weather   = len(anomalies_df[anomalies_df["source"] == "weather"])   if "source" in anomalies_df.columns else 0
 
 # st.metric() renders a nice big number card with a label
 col1.metric("Total Anomalies",     total)
