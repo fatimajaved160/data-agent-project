@@ -30,24 +30,33 @@ st.set_page_config(
 
 @st.cache_data(ttl=300)
 def load_financial_data():
-    conn = sqlite3.connect(DB_PATH)
-    df = pd.read_sql("SELECT * FROM financial ORDER BY timestamp", conn)
-    conn.close()
-    return df
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        df = pd.read_sql("SELECT * FROM financial ORDER BY timestamp", conn)
+        conn.close()
+        return df
+    except Exception:
+        return pd.DataFrame()
 
 @st.cache_data(ttl=300)
 def load_weather_data():
-    conn = sqlite3.connect(DB_PATH)
-    df = pd.read_sql("SELECT * FROM weather ORDER BY timestamp", conn)
-    conn.close()
-    return df
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        df = pd.read_sql("SELECT * FROM weather ORDER BY timestamp", conn)
+        conn.close()
+        return df
+    except Exception:
+        return pd.DataFrame()
 
 @st.cache_data(ttl=300)
 def load_anomalies():
-    conn = sqlite3.connect(DB_PATH)
-    df = pd.read_sql("SELECT * FROM anomalies ORDER BY score ASC", conn)
-    conn.close()
-    return df
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        df = pd.read_sql("SELECT * FROM anomalies ORDER BY score ASC", conn)
+        conn.close()
+        return df
+    except Exception:
+        return pd.DataFrame()
 
 def load_latest_report():
     """Read the most recently generated Claude report from the reports/ folder."""
