@@ -139,51 +139,48 @@ with tab1:
 
     selected = st.selectbox("Select symbol", ALL_SYMBOLS)
 
-    sym_df = fin_df[fin_df["symbol"] == selected].copy()
-
-    if sym_df.empty:
-        st.warning(f"No data for {selected}. Run the pipeline first.")
+    if fin_df.empty or "symbol" not in fin_df.columns:
+        st.warning("No data yet. Click 'Run Full Pipeline' in the sidebar first.")
     else:
-        # Get anomaly dates for this symbol to highlight on the chart
-        sym_anomalies = anomalies_df[anomalies_df["symbol"] == selected]
+        sym_df = fin_df[fin_df["symbol"] == selected].copy()
+        sym_anomalies = anomalies_df[anomalies_df["symbol"] == selected] if "symbol" in anomalies_df.columns else pd.DataFrame()
 
-        # Build an interactive Plotly chart
-        # Plotly lets the user zoom, pan, and hover to see exact values
-        fig = go.Figure()
-
-        # Main price line
-        fig.add_trace(go.Scatter(
-            x=sym_df["timestamp"],
-            y=sym_df["price"],
-            mode="lines",
-            name="Price",
-            line=dict(color="#4C9BE8", width=2)
-        ))
-
-        # Anomaly dots overlaid in red
-        if not sym_anomalies.empty:
-            anom_dates = sym_anomalies["timestamp"].values
-            anom_prices = sym_df[sym_df["timestamp"].isin(anom_dates)]["price"]
-            anom_ts = sym_df[sym_df["timestamp"].isin(anom_dates)]["timestamp"]
+        if sym_df.empty:
+            st.warning(f"No data for {selected}. Run the pipeline first.")
+        else:
+            fig = go.Figure()
 
             fig.add_trace(go.Scatter(
-                x=anom_ts,
-                y=anom_prices,
-                mode="markers",
-                name="Anomaly",
-                marker=dict(color="red", size=10, symbol="circle")
+                x=sym_df["timestamp"],
+                y=sym_df["price"],
+                mode="lines",
+                name="Price",
+                line=dict(color="#4C9BE8", width=2)
             ))
 
-        fig.update_layout(
-            title=f"{selected} — Last 90 Days",
-            xaxis_title="Date",
-            yaxis_title="Price (USD)",
-            hovermode="x unified",
-            height=450
-        )
+            if not sym_anomalies.empty:
+                anom_dates = sym_anomalies["timestamp"].values
+                anom_prices = sym_df[sym_df["timestamp"].isin(anom_dates)]["price"]
+                anom_ts = sym_df[sym_df["timestamp"].isin(anom_dates)]["timestamp"]
 
-        st.plotly_chart(fig, use_container_width=True)
-        st.caption(f"{len(sym_df)} trading days  |  {len(sym_anomalies)} anomalies flagged")
+                fig.add_trace(go.Scatter(
+                    x=anom_ts,
+                    y=anom_prices,
+                    mode="markers",
+                    name="Anomaly",
+                    marker=dict(color="red", size=10, symbol="circle")
+                ))
+
+            fig.update_layout(
+                title=f"{selected} — Last 90 Days",
+                xaxis_title="Date",
+                yaxis_title="Price (USD)",
+                hovermode="x unified",
+                height=450
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+            st.caption(f"{len(sym_df)} trading days  |  {len(sym_anomalies)} anomalies flagged")
 
 
 # ── Tab 2: Weather ────────────────────────────────────────────────────────────
@@ -193,7 +190,7 @@ with tab2:
     if weather_df.empty:
         st.warning("No weather data. Run the pipeline first.")
     else:
-        wx_anomalies = anomalies_df[anomalies_df["symbol"] == "London"]
+        wx_anomalies = anomalies_df[anomalies_df["symbol"] == "London"] if "symbol" in anomalies_df.columns else pd.DataFrame()
 
         fig2 = go.Figure()
         fig2.add_trace(go.Scatter(
